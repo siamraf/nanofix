@@ -19,28 +19,29 @@ package com.lmax.nanofix.incoming;
 import com.lmax.nanofix.FixUtil;
 import com.lmax.nanofix.MessageParserCallback;
 import com.lmax.nanofix.byteoperations.Bits;
+import org.apache.log4j.Logger;
 
 import java.nio.ByteBuffer;
-import java.util.logging.Level;
 
 public final class FixStreamMessageParser
         implements ByteStreamMessageParser
 {
-    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(FixStreamMessageParser.class.getName());
+   private static final Logger LOGGER = Logger.getLogger(FixStreamMessageParser.class);
 
-    public static final byte ASCII_SOH = 1;
-    public static final byte ASCII_0 = 48;
-    public static final byte ASCII_1 = 49;
-    public static final byte ASCII_8 = 56;
-    public static final byte ASCII_EQUALS = 61;
-    public static final byte ASCII_F = 70;
-    public static final byte ASCII_I = 73;
-    public static final byte ASCII_X = 88;
+   private static final byte ASCII_SOH = FixTagParser.SOH;
+   private static final byte ASCII_0 = 48;
+   private static final byte ASCII_1 = 49;
+   private static final byte ASCII_8 = 56;
+   private static final byte ASCII_EQUALS = 61;
+   private static final byte ASCII_F = 70;
+   private static final byte ASCII_I = 73;
+   private static final byte ASCII_X = 88;
 
-    private static final int FIX_MESSAGE_START_CODEC = Bits.readInt(new byte[] {
-            FixStreamMessageParser.ASCII_8, FixStreamMessageParser.ASCII_EQUALS, FixStreamMessageParser.ASCII_F, FixStreamMessageParser.ASCII_I}, 0);
-    private static final int FIX_MESSAGE_END_CODEC = Bits.readInt(new byte[] {
-            FixStreamMessageParser.ASCII_SOH, FixStreamMessageParser.ASCII_1, FixStreamMessageParser.ASCII_0, FixStreamMessageParser.ASCII_EQUALS}, 0);
+   private static final int FIX_MESSAGE_START_CODEC = Bits.readInt(
+               new byte[]{FixStreamMessageParser.ASCII_8, FixStreamMessageParser.ASCII_EQUALS, FixStreamMessageParser.ASCII_F, FixStreamMessageParser.ASCII_I}, 0);
+   private static final int FIX_MESSAGE_END_CODEC = Bits.readInt(
+               new byte[]{FixStreamMessageParser.ASCII_SOH, FixStreamMessageParser.ASCII_1, FixStreamMessageParser.ASCII_0, FixStreamMessageParser.ASCII_EQUALS}, 0);
+
 
     private final ByteBuffer fragmentedMessage;
     private final int maxMessageSize;
@@ -83,7 +84,7 @@ public final class FixStreamMessageParser
                     fragmentedMessage.toString(),
                     new String(fragmentedMessage.array(), 0, fragmentedMessage.position(), FixUtil.getCharset()));
 
-            LOGGER.log(Level.WARNING, msg, ex);
+            LOGGER.warn(msg, ex);
             messageParserCallback.onParseError(msg);
             fragmentedMessage.clear();
         }

@@ -160,13 +160,11 @@ public class FixStreamMessageParserPermutationsTest
             @Override
             public void onTruncatedMessage()
             {
-
             }
 
             @Override
             public void onParseError(String error)
             {
-
             }
         };
 
