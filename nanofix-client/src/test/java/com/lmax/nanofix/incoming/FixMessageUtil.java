@@ -16,12 +16,11 @@
 
 package com.lmax.nanofix.incoming;
 
-import java.util.Arrays;
-
-
 import com.lmax.nanofix.byteoperations.ByteUtil;
-
 import org.junit.Test;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 public final class FixMessageUtil
 {
@@ -59,7 +58,7 @@ public final class FixMessageUtil
     {
         byte[] buffer = new byte[LOGON_MESSAGE.length];
         System.arraycopy(LOGON_MESSAGE, 0, buffer, 0, LOGON_MESSAGE.length);
-        prepareBuffer(buffer);
+        prepareBufferForByteForm(buffer);
         return buffer;
     }
 
@@ -67,7 +66,7 @@ public final class FixMessageUtil
     {
         byte[] buffer = new byte[NEW_ORDER_SINGLE.length];
         System.arraycopy(NEW_ORDER_SINGLE, 0, buffer, 0, NEW_ORDER_SINGLE.length);
-        prepareBuffer(buffer);
+        prepareBufferForByteForm(buffer);
         return buffer;
     }
 
@@ -75,7 +74,7 @@ public final class FixMessageUtil
     {
         byte[] buffer = new byte[EXECUTION_REPORT.length];
         System.arraycopy(EXECUTION_REPORT, 0, buffer, 0, EXECUTION_REPORT.length);
-        prepareBuffer(buffer);
+        prepareBufferForByteForm(buffer);
         return buffer;
     }
 
@@ -83,13 +82,52 @@ public final class FixMessageUtil
     {
         byte[] buffer = new byte[TRUNCATED_EXECUTION_REPORT.length];
         System.arraycopy(TRUNCATED_EXECUTION_REPORT, 0, buffer, 0, TRUNCATED_EXECUTION_REPORT.length);
-        prepareBuffer(buffer);
+        prepareBufferForByteForm(buffer);
         return buffer;
     }
 
-    private static void prepareBuffer(final byte[] buffer)
+    private static void prepareBufferForByteForm(final byte[] buffer)
     {
         ByteUtil.replace(buffer, 0, buffer.length, BAR, SOH);
+    }
+
+    public static byte[] convertFixControlCharacters(String message)
+    {
+        try
+        {
+            byte[] asByteArray = message.getBytes("ASCII");
+            byte[] buffer = new byte[asByteArray.length];
+            System.arraycopy(asByteArray, 0, buffer, 0, asByteArray.length);
+            prepareBufferForByteForm(buffer);
+            return buffer;
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("ASCII not supported by your runtime environment");
+        }
+    }
+
+    public static String convertFixControlCharacters(byte[] message)
+    {
+        try
+        {
+            byte[] buffer = new byte[message.length];
+            System.arraycopy(message, 0, buffer, 0, message.length);
+            prepareBufferForStringForm(buffer);
+            return new String(buffer, "ASCII");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("ASCII not supported by your runtime environment");
+        }
+    }
+
+    private static void prepareBufferForStringForm(final byte[] buffer)
+    {
+        final byte soh = (byte)1;
+        final byte bar = (byte)124;
+
+        ByteUtil.replace(buffer, 0, buffer.length, soh, bar);
     }
 
     public static void setOrderIdOnNewOrderSingle(final long orderId, final byte[] newOrderSingle)
